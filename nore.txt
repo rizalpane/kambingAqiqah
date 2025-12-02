@@ -1,0 +1,5 @@
+CREATE USER 'laraveluser'@'localhost' IDENTIFIED BY 'passwordku';
+GRANT ALL PRIVILEGES ON kambing_aqiqah.* TO 'laraveluser'@'localhost';
+FLUSH PRIVILEGES;
+
+
