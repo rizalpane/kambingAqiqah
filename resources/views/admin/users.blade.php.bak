@@ -1,0 +1,237 @@
+@extends('layouts.layoutAdmin')
+@section('title', 'Manajemen Pengguna')
+@section('content')
+
+<!-- Page Header with Gradient -->
+<div class="page-header-gradient">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h2 class="header-title mb-1">Manajemen Pengguna</h2>
+                        <p class="header-subtitle mb-0">Kelola data pengguna dengan role User</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="header-badge">
+                    <i class="bi bi-calendar3"></i>
+                    {{ date('d F Y') }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="gradient-circle gradient-circle-1"></div>
+    <div class="gradient-circle gradient-circle-2"></div>
+</div>
+
+<div class="container-fluid p-4">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $users->count() }}</div>
+                    <div class="stats-label">Total Users</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="bi bi-person-check"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $users->where('created_at', '>=', now()->subDays(30))->count() }}</div>
+                    <div class="stats-label">User Baru (30 Hari)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card stats-card-info">
+                <div class="stats-icon">
+                    <i class="bi bi-envelope-check"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $users->whereNotNull('email')->count() }}</div>
+                    <div class="stats-label">Email Terverifikasi</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $users->where('created_at', '>=', now()->subWeek())->count() }}</div>
+                    <div class="stats-label">User Minggu Ini</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert-gradient alert-gradient-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert-gradient alert-gradient-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Users Table Card -->
+    <div class="custom-card">
+        <div class="custom-card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Daftar Pengguna</h5>
+                </div>
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Cari user...">
+                </div>
+            </div>
+        </div>
+        <div class="custom-card-body">
+            @if($users->count() > 0)
+                <div class="table-responsive">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pengguna</th>
+                                <th>Email</th>
+                                <th>Telepon</th>
+                                <th>Alamat</th>
+                                <th>Terdaftar</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            @foreach($users as $user)
+                                <tr class="user-row">
+                                    <td>
+                                        <div class="badge-id">#{{ $user->id }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">
+                                                @if($user->avatar)
+                                                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar">
+                                                @else
+                                                    <img src="{{ asset('images/default-avatar.png') }}" alt="Avatar">
+                                                @endif
+                                            </div>
+                                            <div class="user-details">
+                                                <div class="user-name">{{ $user->name }}</div>
+                                                <div class="user-role">
+                                                    <i class="bi bi-person-badge"></i> User
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="email-cell">
+                                            <i class="bi bi-envelope"></i>
+                                            {{ $user->email }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="phone-cell">
+                                            <i class="bi bi-telephone"></i>
+                                            {{ $user->phone ?? '-' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="address-cell">
+                                            <i class="bi bi-geo-alt"></i>
+                                            {{ Str::limit($user->address ?? '-', 30) }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="date-cell">
+                                            <i class="bi bi-calendar-check"></i>
+                                            {{ $user->created_at->format('d M Y') }}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="action-buttons">
+                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-action btn-action-edit" title="Edit User">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button" class="btn-action btn-action-delete" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $user->id }}" title="Hapus User">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content custom-modal">
+                                            <div class="modal-header-gradient">
+                                                <h5 class="modal-title">
+                                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                                    Konfirmasi Hapus
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="text-center mb-3">
+                                                    <div class="modal-icon-warning">
+                                                        <i class="bi bi-person-x"></i>
+                                                    </div>
+                                                </div>
+                                                <p class="text-center mb-2">Apakah Anda yakin ingin menghapus user:</p>
+                                                <h5 class="text-center mb-3"><strong>{{ $user->name }}</strong></h5>
+                                                <div class="alert alert-danger-custom">
+                                                    <i class="bi bi-info-circle me-2"></i>
+                                                    Data yang dihapus tidak dapat dikembalikan!
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn-modal btn-modal-secondary" data-bs-dismiss="modal">
+                                                    <i class="bi bi-x-circle me-1"></i> Batal
+                                                </button>
+                                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn-modal btn-modal-danger">
+                                                        <i class="bi bi-trash me-1"></i> Hapus
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h5>Belum Ada Pengguna</h5>
+                    <p>Tidak ada pengguna yang terdaftar di sistem.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endsection

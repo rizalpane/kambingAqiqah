@@ -42,9 +42,11 @@
 
                     <div class="col-md-6">
                         <label for="category" class="form-label">Kategori <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('category') is-invalid @enderror" 
-                               id="category" name="category" placeholder="Contoh: Hewan" 
-                               value="{{ old('category', $product->category) }}" required>
+                        <select class="form-select @error('category') is-invalid @enderror" 
+                                id="category" name="category" required>
+                            <option value="Jantan" {{ old('category', $product->category) == 'Jantan' ? 'selected' : '' }}>Jantan</option>
+                            <option value="Betina" {{ old('category', $product->category) == 'Betina' ? 'selected' : '' }}>Betina</option>
+                        </select>
                         @error('category')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror

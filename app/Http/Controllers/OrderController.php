@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\MidtransHelper;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -145,10 +146,21 @@ class OrderController extends Controller
             $order->update([
                 'status' => 'success',
                 'payment_date' => now(),
+                'order_status' => 'pending', // Set order status to pending after payment
             ]);
 
             // Reduce product stock
             $order->product->decrement('stock', $order->quantity);
+
+            // Create order notification
+            ActivityLog::create([
+                'type' => 'order',
+                'action' => 'new_order',
+                'message' => 'Pesanan baru #' . $order->order_number . ' dari ' . $order->user->name . ' - ' . $order->product->name,
+                'icon' => 'bi-bag-check-fill',
+                'related_id' => $order->id,
+                'related_type' => 'order',
+            ]);
 
             Log::info('Order ' . $order_id . ' marked as success');
         } elseif ($transaction == 'pending') {
@@ -182,6 +194,7 @@ class OrderController extends Controller
         $order->update([
             'status' => 'success',
             'payment_date' => now(),
+            'order_status' => 'pending',
         ]);
 
         // Reduce product stock if available
@@ -190,6 +203,16 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             Log::warning('Failed to decrement stock for order ' . $order->id . ': ' . $e->getMessage());
         }
+
+        // Create order notification
+        ActivityLog::create([
+            'type' => 'order',
+            'action' => 'new_order',
+            'message' => 'Pesanan baru #' . $order->order_number . ' dari ' . $order->user->name . ' - ' . $order->product->name,
+            'icon' => 'bi-bag-check-fill',
+            'related_id' => $order->id,
+            'related_type' => 'order',
+        ]);
 
         return redirect()->route('user.history')
             ->with('success', 'Pembayaran dikonfirmasi. Terima kasih.');
@@ -236,7 +259,7 @@ class OrderController extends Controller
 
         // Map statuses
         if (in_array($status, ['capture', 'settlement', 'success', 'completed'])) {
-            $order->update(['status' => 'success', 'payment_date' => now()]);
+            $order->update(['status' => 'success', 'payment_date' => now(), 'order_status' => 'pending']);
             try { $order->product->decrement('stock', $order->quantity); } catch (\Exception $e) { Log::warning($e->getMessage()); }
         } elseif ($status === 'pending') {
             $order->update(['status' => 'pending']);

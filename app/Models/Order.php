@@ -16,6 +16,9 @@ class Order extends Model
         'price',
         'total_price',
         'status',
+        'order_status',
+        'is_received',
+        'received_at',
         'payment_date',
         'notes',
         'midtrans_order_id',
@@ -23,8 +26,10 @@ class Order extends Model
 
     protected $casts = [
         'payment_date' => 'datetime',
+        'received_at' => 'datetime',
         'price' => 'decimal:0',
         'total_price' => 'decimal:0',
+        'is_received' => 'boolean',
     ];
 
     /**
